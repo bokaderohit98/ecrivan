@@ -29,28 +29,37 @@ class TextGenerator:
         self.model.load_weights('./model/textGenerator.weights.h5')
 
     def encode(self, initialText):
-        inputText = initialText[-100:]
-        inputTensor = [self.charToN[char] for char in inputText]
+        try:
+            inputText = initialText[-100:].lower()
+            inputTensor = [self.charToN[char] for char in inputText]
+        except Exception as error:
+            print(error)
         return inputTensor
 
     def decode(self, initialText, generatedTensor):
-        generatedTensor = [self.NToChar[i] for i in generatedTensor]
+        try:
+            generatedTensor = [self.NToChar[i] for i in generatedTensor]
+        except Exception as error:
+            print(error)
         return initialText + ''.join(generatedTensor)
 
     def predict(self, initialText, wordLimit):
-        inputTensor = self.encode(initialText)
-        generatedTensor = []
-        charsToGenerate = wordLimit - len(initialText)
+        try:
+            inputTensor = self.encode(initialText)
+            generatedTensor = []
+            charsToGenerate = wordLimit - len(initialText)
 
-        with self.graph.as_default():
-            for i in range(charsToGenerate):
-                x = np.reshape(inputTensor, (1, len(inputTensor), 1))
-                x = x / self.nChars
+            with self.graph.as_default():
+                for i in range(charsToGenerate):
+                    x = np.reshape(inputTensor, (1, len(inputTensor), 1))
+                    x = x / self.nChars
 
-                predIndex = np.argmax(self.model.predict([x]))
-                generatedTensor.append(predIndex)
-                inputTensor.append(predIndex)
-                inputTensor = inputTensor[-100:]
+                    predIndex = np.argmax(self.model.predict([x]))
+                    generatedTensor.append(predIndex)
+                    inputTensor.append(predIndex)
+                    inputTensor = inputTensor[-100:]
 
-        generatedText = self.decode(initialText, generatedTensor)
+            generatedText = self.decode(initialText, generatedTensor)
+        except Exception as error:
+            print(error)
         return generatedText
