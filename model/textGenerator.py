@@ -51,17 +51,3 @@ class TextGenerator:
 
         generatedText = self.decode(initialText, generatedTensor)
         return generatedText
-
-
-        
-
-        
-
-def main():
-    model = TextGenerator()
-    initialText = '''the riper should by time decease,\n his tender heir might bear his memory:\n but thou, contracted to the world's false sporoe,\n with eyes so dond touls be thy domfornds,\n which for'''
-    print(model.predict(initialText, 250))
-
-
-if __name__ == '__main__':
-    main()
