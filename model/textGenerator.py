@@ -6,11 +6,13 @@ import pickle
 class TextGenerator:
     '''Text Generator model class for predicting text'''
 
-    def __init__(self):
-        with open('../cache/charToNMapping.pkl', 'rb') as file:
+    def __init__(self, graph):
+        self.graph = graph
+
+        with open('./cache/charToNMapping.pkl', 'rb') as file:
             self.charToN = pickle.load(file)
 
-        with open('../cache/NToCharMapping.pkl', 'rb') as file:
+        with open('./cache/nToCharMapping.pkl', 'rb') as file:
             self.NToChar = pickle.load(file)
 
         self.nChars = len(self.charToN)
@@ -24,7 +26,7 @@ class TextGenerator:
         self.model.add(Dropout(0.2))
         self.model.add(Dense(38, activation='softmax'))
         self.model.compile(loss='categorical_crossentropy', optimizer='adam')
-        self.model.load_weights('./textGenerator.weights.h5')
+        self.model.load_weights('./model/textGenerator.weights.h5')
 
     def encode(self, initialText):
         inputText = initialText[-100:]
@@ -40,14 +42,15 @@ class TextGenerator:
         generatedTensor = []
         charsToGenerate = wordLimit - len(initialText)
 
-        for i in range(charsToGenerate):
-            x = np.reshape(inputTensor, (1, len(inputTensor), 1))
-            x = x / self.nChars
+        with self.graph.as_default():
+            for i in range(charsToGenerate):
+                x = np.reshape(inputTensor, (1, len(inputTensor), 1))
+                x = x / self.nChars
 
-            predIndex = np.argmax(self.model.predict([x]))
-            generatedTensor.append(predIndex)
-            inputTensor.append(predIndex)
-            inputTensor = inputTensor[-100:]
+                predIndex = np.argmax(self.model.predict([x]))
+                generatedTensor.append(predIndex)
+                inputTensor.append(predIndex)
+                inputTensor = inputTensor[-100:]
 
         generatedText = self.decode(initialText, generatedTensor)
         return generatedText

@@ -1,7 +1,9 @@
 from flask import Flask, request, send_file, send_from_directory, abort, jsonify
 from flask_cors import CORS
 import os
-from utils.storyGenerator import storyGenerator
+import tensorflow as tf
+from utils.textGenerator import textGenerator
+from model.textGenerator import TextGenerator
 
 app = Flask(__name__, static_folder='build')
 CORS(app)
@@ -21,7 +23,7 @@ def ecrivan():
     initialText = request.args.get('inputText')
     wordLimit = request.args.get('wordLimit')
     try:
-        story = storyGenerator(initialText, wordLimit)
+        story = textGenerator(model, initialText, wordLimit)
     except Exception as error:
         print(error)
         return abort(400)
@@ -29,4 +31,6 @@ def ecrivan():
     return jsonify({'story': story})
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    graph = tf.get_default_graph()
+    model = TextGenerator(graph)
+    app.run(port=5000)
